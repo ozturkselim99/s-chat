@@ -1,46 +1,48 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useLayoutEffect} from 'react';
 
-import {StyleSheet, Text, View, Button, TouchableOpacity,Image} from 'react-native';
+import {StyleSheet, Text, View, Button, TouchableOpacity, Image} from 'react-native';
 import {getFocusedRouteNameFromRoute, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import Intro from "./src/screens/Intro";
-import Verification from "./src/screens/Verification";
 import VerificationCode from "./src/screens/VerificationCode";
 import {neutralColors} from "./src/utils/Theme";
 import CreateProfile from "./src/screens/CreateProfile";
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Contacts from "./src/screens/Contacts";
+import Groups from "./src/screens/Groups";
 import Chats from "./src/screens/Chats";
 import More from "./src/screens/More";
 import ChatScreen from "./src/screens/ChatScreen";
 import LoginScreen from "./src/screens/LoginScreen";
+import CreateGroup from "./src/screens/CreateGroup";
+import GroupDetail from "./src/screens/GroupDetail";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const GroupsStack = createNativeStackNavigator();
+const ChatsStack = createNativeStackNavigator();
 
-const ContactsStack = createNativeStackNavigator();
 
-function ContactsStackScreen() {
+function GroupsStackScreen() {
     return (
-        <ContactsStack.Navigator
+        <GroupsStack.Navigator
             screenOptions={{
                 headerStyle: {
                     backgroundColor: neutralColors.white,
                     shadowColor: 'transparent', // this covers iOS
                     elevation: 0, // this covers Android
                 },
-                title: "Contacts",
+                title: "Groups",
                 headerShadowVisible: false, // applied here
             }}
         >
-            <ContactsStack.Screen  name="Contacts" component={Contacts}/>
-            <ContactsStack.Screen name="ChatScreen" component={ChatScreen}/>
-        </ContactsStack.Navigator>
+            <GroupsStack.Screen name="Groups" component={Groups}/>
+            <GroupsStack.Screen name="CreateGroup" component={CreateGroup}/>
+            <GroupsStack.Screen name="ChatScreen" component={ChatScreen}/>
+            <ChatsStack.Screen name="GroupDetail" component={GroupDetail}/>
+        </GroupsStack.Navigator>
     );
 }
-
-const ChatsStack = createNativeStackNavigator();
 
 function ChatsStackScreen() {
     return (
@@ -51,12 +53,13 @@ function ChatsStackScreen() {
                     shadowColor: 'transparent', // this covers iOS
                     elevation: 0, // this covers Android
                 },
-                title: "Contacts",
+                title: "Groups",
                 headerShadowVisible: false, // applied here
             }}
         >
-            <ChatsStack.Screen  name="Chats" component={Chats}/>
+            <ChatsStack.Screen name="Chats" component={Chats}/>
             <ChatsStack.Screen name="ChatScreen" component={ChatScreen}/>
+            <ChatsStack.Screen name="GroupDetail" component={GroupDetail}/>
         </ChatsStack.Navigator>
     );
 }
@@ -65,20 +68,20 @@ function Home() {
     return (
         <Tab.Navigator
         >
-            <Tab.Screen name="Contacts"
-                        options={({ route }) => {
+            <Tab.Screen name="Groups"
+                        options={({route}) => {
                             const routeName = getFocusedRouteNameFromRoute(route);
                             return {
                                 tabBarStyle: {
                                     display: routeName === "ChatScreen" ? "none" : "flex",
                                 },
-                                tabBarLabelStyle:{
-                                    fontSize:14,
-                                    fontWeight:"600"
+                                tabBarLabelStyle: {
+                                    fontSize: 14,
+                                    fontWeight: "600"
                                 },
-                                headerShown:false,
-                                tabBarIcon:()=>{
-                                    return(
+                                headerShown: false,
+                                tabBarIcon: () => {
+                                    return (
                                         <Image
                                             source={require('./src/assets/icons/contacts.png')}
                                         />
@@ -88,20 +91,20 @@ function Home() {
                         }}
 
 
-                        component={ContactsStackScreen}/>
-            <Tab.Screen name="Chats"  options={({ route }) => {
+                        component={GroupsStackScreen}/>
+            <Tab.Screen name="Chats" options={({route}) => {
                 const routeName = getFocusedRouteNameFromRoute(route);
                 return {
                     tabBarStyle: {
                         display: routeName === "ChatScreen" ? "none" : "flex",
                     },
-                    tabBarLabelStyle:{
-                        fontSize:14,
-                        fontWeight:"600"
+                    tabBarLabelStyle: {
+                        fontSize: 14,
+                        fontWeight: "600"
                     },
-                    headerShown:false,
-                    tabBarIcon:()=>{
-                        return(
+                    headerShown: false,
+                    tabBarIcon: () => {
+                        return (
                             <Image
                                 source={require('./src/assets/icons/message_circle.png')}
                             />
@@ -111,22 +114,21 @@ function Home() {
             }}
                         component={ChatsStackScreen}/>
             <Tab.Screen name="More" options={{
-                tabBarLabelStyle:{
-                    fontSize:14,
-                    fontWeight:"600"
+                tabBarLabelStyle: {
+                    fontSize: 14,
+                    fontWeight: "600"
                 },
-                tabBarIcon:()=>{
-                    return(
+                tabBarIcon: () => {
+                    return (
                         <Image
                             source={require('./src/assets/icons/more_horizontal.png')}
                         />
                     )
                 }
-            }}component={More}/>
+            }} component={More}/>
         </Tab.Navigator>
     );
 }
-
 
 export default function App() {
     return (
@@ -145,7 +147,6 @@ export default function App() {
             >
                 <Stack.Screen name="Intro" component={Intro}/>
                 <Stack.Screen name="Login" component={LoginScreen}/>
-                <Stack.Screen name="Verification" component={Verification}/>
                 <Stack.Screen name="VerificationCode" component={VerificationCode}/>
                 <Stack.Screen name="CreateProfile" component={CreateProfile}/>
                 <Stack.Screen name="Home" options={{headerShown: false}} component={Home}/>
