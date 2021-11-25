@@ -1,87 +1,92 @@
-import React, {useLayoutEffect} from "react";
+import React from "react";
 import {SafeAreaView, Text, View, TouchableOpacity, Image} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import {brandColors, neutralColors} from "../utils/Theme";
-import CustomSearchInput from "../components/CustomSearchInput";
+import {neutralColors} from "../utils/Theme";
+import {auth} from "../../firebase";
 
-const More=({navigation})=>{
-    return(
-        <SafeAreaView style={{flex:1, flexDirection:"column",backgroundColor:"white",padding:24}}>
+const More = ({navigation}) => {
+
+    const logOut = () => {
+        alert("See you again")
+        auth.signOut().then(() => {
+            navigation.replace("Login")
+        })
+    }
+
+    return (
+        <SafeAreaView style={{flex: 1, flexDirection: "column", backgroundColor: "white", padding: 24}}>
             <TouchableOpacity style={{
-                flexDirection:"row"
+                flexDirection: "row"
             }}>
                 <View style={{
-                    borderRadius:50,
-                    width:50,
-                    height:50,
-                    alignItems:"center",
-                    justifyContent:"center",
-                    backgroundColor:neutralColors.line
+                    borderRadius: 50,
+                    width: 50,
+                    height: 50,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: neutralColors.line
                 }}>
                     <Image
 
                         source={require("../assets/icons/profile.png")}
                     />
                 </View>
-                <View style={{flexDirection:"column",justifyContent:"center",marginLeft:20}}>
+                <View style={{flexDirection: "column", justifyContent: "center", marginLeft: 20}}>
                     <Text style={{
-                        fontSize:14,
-                        color:neutralColors.active,
-                        fontWeight:"600",
-                        lineHeight:24
+                        fontSize: 14,
+                        color: neutralColors.active,
+                        fontWeight: "600",
+                        lineHeight: 24
                     }}>
-                        Almayra Zamzamy
+                        {auth.currentUser.displayName}
                     </Text>
                     <Text
                         style={{
-                            fontSize:12,
-                            color:neutralColors.disabled,
-                            fontWeight:"normal",
-                            lineHeight:20
+                            fontSize: 12,
+                            color: neutralColors.disabled,
+                            fontWeight: "normal",
+                            lineHeight: 20
                         }}
                     >
-                        +62 1309 - 1710 - 1920
+                        {auth.currentUser.email}
                     </Text>
                 </View>
-                <View  style={{
-                    alignItems:"center",
-                    marginLeft:"auto",
-                    justifyContent:"center"
+                <View style={{
+                    alignItems: "center",
+                    marginLeft: "auto",
+                    justifyContent: "center"
                 }}>
                     <Image
                         source={require("../assets/icons/right_arrow.png")}
                     />
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{
-                paddingVertical:8,
-                flexDirection:"row",
-                marginTop:16,
-                alignItems:"center"
-            }}>
-                <Image
-
-                    source={require("../assets/icons/appereance.png")}
-                />
+            <TouchableOpacity onPress={logOut}
+                              style={{
+                                  paddingVertical: 8,
+                                  flexDirection: "row",
+                                  marginTop: 16,
+                                  alignItems: "center"
+                              }}>
+                <Ionicons name="log-out" size={24} color={neutralColors.active}/>
                 <Text style={{
-                    fontSize:14,
-                    color:neutralColors.active,
-                    fontWeight:"600",
-                    lineHeight:24,
-                    marginLeft:6
+                    fontSize: 14,
+                    color: neutralColors.active,
+                    fontWeight: "600",
+                    lineHeight: 24,
+                    marginLeft: 6
                 }}>
-                   Appereance
+                    Logout
                 </Text>
-                <View  style={{
-                    alignItems:"center",
-                    marginLeft:"auto",
-                    justifyContent:"center"
+                <View style={{
+                    alignItems: "center",
+                    marginLeft: "auto",
+                    justifyContent: "center"
                 }}>
                     <Image
                         source={require("../assets/icons/right_arrow.png")}
                     />
                 </View>
-
             </TouchableOpacity>
         </SafeAreaView>
     )
