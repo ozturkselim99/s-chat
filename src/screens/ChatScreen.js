@@ -1,12 +1,5 @@
 import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
-import {
-    ScrollView,
-    SafeAreaView,
-    Text,
-    TouchableOpacity,
-    View,
-    Image,
-} from "react-native";
+import {Image, LogBox, SafeAreaView, ScrollView, Text, TouchableOpacity, View} from "react-native";
 import {brandColors, neutralColors} from "../utils/Theme";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import CustomInput from "../components/CustomInput";
@@ -24,23 +17,14 @@ const ChatScreen = ({navigation, route}) => {
     const [userDetail, setUserDetail] = useState({})
 
     useEffect(() => {
-        getAuthUserDetail()
-        getMembers()
-        const subscriber = db.collection("groups")
-            .doc(route.params.id)
-            .collection("messages")
-            .orderBy("timeStamp")
-            .onSnapshot(querySnapshot => {
-                const msg = [];
-                querySnapshot.forEach(documentSnapshot => {
-                    msg.push({
-                        data: documentSnapshot.data(),
-                        key: documentSnapshot.id
-                    });
-                });
-                setMessages(msg)
-            });
-        return subscriber;
+        LogBox.ignoreLogs(['Setting a timer']);
+        getAuthUserDetail().then(() => {
+        })
+        getMembers().then(() => {
+        })
+        fetchMessages().then(() => {
+        })
+
     }, [])
 
     useLayoutEffect(() => {
@@ -49,6 +33,10 @@ const ChatScreen = ({navigation, route}) => {
                 <TouchableOpacity onPress={() => navigation.navigate("GroupDetail", {
                     members: members,
                     groupName: route.params.groupName,
+                    creator: route.params.creator,
+                    createdAt: route.params.createdAt,
+                    creatorUserId: route.params.creatorUserId,
+                    groupId: route.params.id
                 })} style={{
                     flexDirection: "row",
                     alignItems: "center"
@@ -92,32 +80,94 @@ const ChatScreen = ({navigation, route}) => {
         })
     }, [members])
 
-    const sendMessage = () => {
-        db.collection("groups").doc(route.params.id).update({
-            members: firebase.firestore.FieldValue.arrayUnion({member: userDetail})
-        }).then(() => {
-            db.collection("groups").doc(route.params.id).collection("messages").add({
-                timeStamp: firebase.firestore.FieldValue.serverTimestamp(),
-                userId: auth.currentUser.uid,
-                message: input,
-                displayName: auth.currentUser.displayName,
-                photoURL: auth.currentUser.photoURL
-            }).then(() => {
+    const sendMessage = async () => {
+        try {
+            await db.collection("groups").doc(route.params.id).update({
+                members: firebase.firestore.FieldValue.arrayUnion({member: userDetail})
+            }).then(async () => {
+                await db.collection("groups").doc(route.params.id).collection("messages").add({
+                    timeStamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    userId: auth.currentUser.uid,
+                    message: input,
+                    displayName: auth.currentUser.displayName,
+                    photoURL: auth.currentUser.photoURL
+                }).then(async () => {
+                    await members.forEach(member => {
+                        sendPushNotification(member.member.expoPushToken, input, auth.currentUser.displayName)
+
+                    })
+                })
             })
-        })
+        } catch (err) {
+            console.log(err)
+            return
+        }
         setInput('')
     }
 
-    const getMembers = () => {
-        db.collection("groups").doc(route.params.id).get().then(doc => {
-            setMembers(doc.data().members)
-        })
+    const getMembers = async () => {
+        try {
+            await db.collection("groups").doc(route.params.id).get().then(doc => {
+                setMembers(doc.data().members)
+
+            })
+        } catch (err) {
+            console.log(err)
+
+        }
     }
 
-    const getAuthUserDetail = () => {
-        db.collection("users").doc(auth.currentUser.uid).get().then(doc => {
-            setUserDetail(doc.data())
-        })
+    const getAuthUserDetail = async () => {
+        try {
+            await db.collection("users").doc(auth.currentUser.uid).get().then(doc => {
+                setUserDetail(doc.data())
+
+            })
+        } catch (err) {
+            console.log(err)
+
+        }
+    }
+
+    const fetchMessages = async () => {
+        try {
+            await db.collection("groups")
+                .doc(route.params.id)
+                .collection("messages")
+                .orderBy("timeStamp")
+                .onSnapshot(querySnapshot => {
+                    const msg = [];
+                    querySnapshot.forEach(documentSnapshot => {
+                        msg.push({
+                            data: documentSnapshot.data(),
+                            key: documentSnapshot.id
+                        });
+                    });
+                    setMessages(msg)
+
+                });
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    const sendPushNotification = async (expoPushToken, message, displayName) => {
+        const _message = {
+            to: expoPushToken,
+            sound: 'default',
+            title: displayName,
+            body: message,
+            data: {someData: 'goes here'},
+        };
+
+        await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(_message),
+        });
     }
 
     return (
@@ -128,9 +178,9 @@ const ChatScreen = ({navigation, route}) => {
                 showsVerticalScrollIndicator={false}
             >
                 {messages.map(({key, data}) => (auth.currentUser.uid === data.userId ? (
-                    <SenderChatItem messages={data.message} displayName={data.displayName} time={data.timeStamp}/>
+                    <SenderChatItem key={key} messages={data.message} displayName={data.displayName} time={data.timeStamp}/>
                 ) : (
-                    <ReceiverChatItem messages={data.message} displayName={data.displayName} time={data.timeStamp}/>
+                    <ReceiverChatItem key={key} messages={data.message} displayName={data.displayName} time={data.timeStamp}/>
                 )))}
             </ScrollView>
             <View style={{
