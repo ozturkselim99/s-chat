@@ -1,7 +1,5 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useLayoutEffect} from 'react';
-
-import {StyleSheet, Text, View, Button, TouchableOpacity, Image} from 'react-native';
+import React from 'react';
+import {Image} from 'react-native';
 import {getFocusedRouteNameFromRoute, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import Intro from "./src/screens/Intro";
@@ -9,19 +7,21 @@ import VerificationCode from "./src/screens/VerificationCode";
 import {neutralColors} from "./src/utils/Theme";
 import CreateProfile from "./src/screens/CreateProfile";
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 import Groups from "./src/screens/Groups";
 import Chats from "./src/screens/Chats";
-import More from "./src/screens/More";
 import ChatScreen from "./src/screens/ChatScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import CreateGroup from "./src/screens/CreateGroup";
 import GroupDetail from "./src/screens/GroupDetail";
+import CustomDrawerContent from "./src/components/CustomDrawerContent";
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const GroupsStack = createNativeStackNavigator();
 const ChatsStack = createNativeStackNavigator();
-
+const Drawer = createDrawerNavigator();
 
 function GroupsStackScreen() {
     return (
@@ -64,68 +64,63 @@ function ChatsStackScreen() {
     );
 }
 
+const DrawerNavigator = () => {
+    return (
+        <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}>
+            <Drawer.Screen name="DrawerHome" component={Home} options={{headerShown: false}}/>
+        </Drawer.Navigator>
+    );
+}
+
 function Home() {
     return (
         <Tab.Navigator
-        >
-            <Tab.Screen name="Groups"
-                        options={({route}) => {
-                            const routeName = getFocusedRouteNameFromRoute(route);
-                            return {
-                                tabBarStyle: {
-                                    display: routeName === "ChatScreen" ? "none" : "flex",
-                                },
-                                tabBarLabelStyle: {
-                                    fontSize: 14,
-                                    fontWeight: "600"
-                                },
-                                headerShown: false,
-                                tabBarIcon: () => {
-                                    return (
-                                        <Image
-                                            source={require('./src/assets/icons/contacts.png')}
-                                        />
-                                    )
-                                }
-                            }
-                        }}
-
-
-                        component={GroupsStackScreen}/>
-            <Tab.Screen name="Chats" options={({route}) => {
+            screenOptions={({route}) => {
                 const routeName = getFocusedRouteNameFromRoute(route);
                 return {
+                    showLabel: false,
+                    tabBarActiveTintColor: neutralColors.active,
+                    tabBarInactiveTintColor:neutralColors.disabled,
+                    tabBarHideOnKeyboard:true,
                     tabBarStyle: {
+                        elevation:4,
+                        borderTopWidth:0,
+                        paddingTop: 5,
+                        height: 65,
+                        flexDirection: "row",
                         display: routeName === "ChatScreen" ? "none" : "flex",
                     },
                     tabBarLabelStyle: {
                         fontSize: 14,
-                        fontWeight: "600"
+                        marginBottom: 6,
+                        fontWeight: "700"
                     },
                     headerShown: false,
-                    tabBarIcon: () => {
-                        return (
+                }
+            }}
+        >
+            <Tab.Screen options={
+                {
+                    tabBarIcon: (tabInfo) => (
+                        <Image
+                            source={require('./src/assets/icons/contacts.png')}
+                        />
+                    ),
+                    tabBarLabel:"Groups"
+                }
+            } name="GroupsStack" component={GroupsStackScreen}/>
+            <Tab.Screen
+                options={
+                    {
+                        tabBarIcon: (tabInfo) => (
                             <Image
                                 source={require('./src/assets/icons/message_circle.png')}
                             />
-                        )
+                        ),
+                        tabBarLabel:"Chats"
                     }
                 }
-            }}
-                        component={ChatsStackScreen}/>
-            <Tab.Screen name="More" options={{
-                tabBarLabelStyle: {
-                    fontSize: 14,
-                    fontWeight: "600"
-                },
-                tabBarIcon: () => {
-                    return (
-                        <Image
-                            source={require('./src/assets/icons/more_horizontal.png')}
-                        />
-                    )
-                }
-            }} component={More}/>
+                name="ChatsStack"  component={ChatsStackScreen}/>
         </Tab.Navigator>
     );
 }
@@ -149,7 +144,7 @@ export default function App() {
                 <Stack.Screen name="Login" component={LoginScreen}/>
                 <Stack.Screen name="VerificationCode" component={VerificationCode}/>
                 <Stack.Screen name="CreateProfile" component={CreateProfile}/>
-                <Stack.Screen name="Home" options={{headerShown: false}} component={Home}/>
+                <Stack.Screen name="Home" options={{headerShown: false}} component={DrawerNavigator}/>
             </Stack.Navigator>
         </NavigationContainer>
     );
