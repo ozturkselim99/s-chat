@@ -12,11 +12,12 @@ const CustomGroupItem = (props) => {
             .orderBy("timeStamp", "desc").limit(1).onSnapshot(snapshot => {
                 setMessage(snapshot.docs.map(doc => doc.data()))
             })
+        console.log(props.creator)
         return subscriber
     }, [])
     return (
         <TouchableOpacity style={{flexDirection: "row"}}
-                          onPress={() => props.enterChat(props.groupName, props.id, "https://www.clipartmax.com/png/middle/157-1570300_placeholder-image-symbol-for-friendship-group.png")}>
+                          onPress={() => props.enterChat(props.groupName, props.id, "https://www.clipartmax.com/png/middle/157-1570300_placeholder-image-symbol-for-friendship-group.png",props.creator,props.createdAt,props.creatorUserId)}>
             <View style={{position: "relative"}}>
                 <Image
                     source={{uri: "https://www.clipartmax.com/png/middle/157-1570300_placeholder-image-symbol-for-friendship-group.png"}}

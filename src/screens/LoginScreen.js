@@ -1,20 +1,20 @@
 import * as React from 'react';
-import {Text, TouchableOpacity, View} from "react-native";
+import {useEffect, useState} from 'react';
+import {LogBox, Text, TouchableOpacity, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {brandColors, neutralColors} from "../utils/Theme";
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButton";
 import CreateProfile from "./CreateProfile";
-import {useEffect, useState} from "react";
 import {auth} from "../../firebase";
 
 const LoginScreen = ({navigation}) => {
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [signedIn, setSignedIn] = useState(false);
 
     useEffect(() => {
+        LogBox.ignoreLogs(['Setting a timer']);
         auth.onAuthStateChanged((authUser) => {
             if (authUser) {
                 navigation.replace("Home")
@@ -23,10 +23,14 @@ const LoginScreen = ({navigation}) => {
         });
     }, [])
 
-    const signIn = () => {
-        auth.signInWithEmailAndPassword(email, password).then(() => {
-            navigation.navigate("Home")
-        }).catch(error => alert(error))
+    const signIn = async () => {
+        try {
+            await auth.signInWithEmailAndPassword(email, password).then(() => {
+                navigation.navigate("Home")
+            }).catch(error => alert(error))
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     return (
@@ -52,14 +56,13 @@ const LoginScreen = ({navigation}) => {
                 </View>
             </View>
             <CustomInput width={"100%"} marginTop={32} placeholder={"Email"} onChangeText={(text) => setEmail(text)}/>
-            <CustomInput width={"100%"} marginTop={16} placeholder={"Password"}
+            <CustomInput width={"100%"} marginTop={16} marginBottom={32} placeholder={"Password"} secureTextEntry={true}
                          onChangeText={(text) => setPassword(text)}/>
             <CustomButton
-                marginTop={32}
                 backgroundColor={brandColors.default}
                 title={"Login"}
                 titleColor={neutralColors.offWhite}
-                onClicked={signIn}
+                onPress={signIn}
             />
             <CustomButton
                 backgroundColor={neutralColors.white}

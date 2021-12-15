@@ -1,9 +1,10 @@
 import React, {useEffect, useLayoutEffect, useState} from "react";
-import {SafeAreaView, View, TouchableOpacity, FlatList, Image} from "react-native";
+import {FlatList, SafeAreaView, View,LogBox} from "react-native";
 import {neutralColors} from "../utils/Theme";
 import CustomSearchInput from "../components/CustomSearchInput";
 import {auth, db} from "../../firebase";
 import CustomGroupItem from "../components/CustomGroupItem";
+
 
 const Chats = ({navigation}) => {
 
@@ -12,21 +13,9 @@ const Chats = ({navigation}) => {
     const [isSearching, setIsSearching] = React.useState(false);
 
     useEffect(() => {
-        const subscriber = db.collection("groups").onSnapshot(querySnapshot => {
-            const groups = [];
-            querySnapshot.forEach(documentSnapshot => {
-                documentSnapshot.data().members.forEach(data => {
-                    if (data.member.userId == auth.currentUser.uid) {
-                        groups.push({
-                            ...documentSnapshot.data(),
-                            key: documentSnapshot.id
-                        });
-                    }
-                })
-            });
-            setMyGroups(groups)
-        });
-        return subscriber;
+        LogBox.ignoreLogs(['Setting a timer']);
+        fetchGroups().then(() => {
+        })
     }, [])
 
     useLayoutEffect(() => {
@@ -35,16 +24,43 @@ const Chats = ({navigation}) => {
         })
     }, [navigation])
 
-    const enterChat = (groupName, id, imageURL) => {
+    const fetchGroups = async () => {
+        try {
+            db.collection("groups").onSnapshot(querySnapshot => {
+                const groups = [];
+                querySnapshot.forEach(documentSnapshot => {
+                    documentSnapshot.data().members.forEach(data => {
+                        if (data.member.userId == auth.currentUser.uid) {
+                            groups.push({
+                                ...documentSnapshot.data(),
+                                key: documentSnapshot.id
+                            });
+                        }
+                    })
+                });
+                setMyGroups(groups)
+
+            });
+        } catch (err) {
+            console.log(err);
+        }
+
+    }
+
+    const enterChat = (groupName, id, imageURL, creator, createdAt, creatorUserId) => {
         navigation.navigate("ChatScreen", {
             groupName,
             id,
             imageURL,
+            creator,
+            createdAt,
+            creatorUserId,
         })
     }
 
     const renderItem = ({item}) => (
         <CustomGroupItem id={item.key} groupName={item.groupName} memberCount={item.members.length}
+                         creator={item.creator} createdAt={item.createdAt} creatorUserId={item.creatorUserId}
                          enterChat={enterChat}/>
     );
 
@@ -55,7 +71,7 @@ const Chats = ({navigation}) => {
     return (
         <SafeAreaView style={{flex: 1, flexDirection: "column", backgroundColor: "white", padding: 24}}>
             <CustomSearchInput onChangeText={(text) => {
-                if (text.length > 0 && !!text) {
+                if (text.trim()) {
                     setIsSearching(true);
                     const filterData = myGroups.filter((item) => {
                         return item.groupName

@@ -1,12 +1,15 @@
 import * as React from 'react';
-import {Text, View} from 'react-native';
+import {LogBox, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CustomButton from "../components/CustomButton";
 import {brandColors, neutralColors} from "../utils/Theme";
 import {auth} from "../../firebase";
+import {useEffect} from "react";
 
 const VerificationCode = ({navigation}) => {
-
+    useEffect(() => {
+        LogBox.ignoreLogs(['Setting a timer']);
+    }, [])
     const isEmailVerified = () => {
         auth.currentUser.reload().then(() => {
             auth.currentUser.emailVerified ? navigation.navigate("Home") : alert("Email not verified")
@@ -30,7 +33,7 @@ const VerificationCode = ({navigation}) => {
                     backgroundColor={brandColors.default}
                     title={"Continue"}
                     titleColor={neutralColors.offWhite}
-                    onClicked={isEmailVerified}
+                    onPress={isEmailVerified}
                 />
             </View>
         </SafeAreaView>

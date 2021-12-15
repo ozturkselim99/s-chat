@@ -4,7 +4,7 @@ import {Text, TouchableOpacity} from "react-native";
 const CustomButton = (props) => {
     return (
         <TouchableOpacity
-            onPress={props.onClicked}
+            {...props}
             style={{
                 flexDirection: "row",
                 backgroundColor: props.backgroundColor,
@@ -15,7 +15,6 @@ const CustomButton = (props) => {
                 paddingVertical: 12,
                 paddingHorizontal: 48,
                 borderRadius: 30,
-                ...props
             }}>
             <Text style={{
                 fontSize: 16,

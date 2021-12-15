@@ -1,15 +1,25 @@
 import * as React from 'react';
-import {Image, Text, View} from 'react-native';
+import {Image, LogBox, Text, View} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CustomButton from "../components/CustomButton";
 import {brandColors, neutralColors} from "../utils/Theme";
+import {useEffect} from "react";
 
 const Intro = ({navigation}) => {
+    useEffect(() => {
+        LogBox.ignoreLogs(['Setting a timer']);
+    }, [])
     return (
-        <SafeAreaView style={{flex: 1, flexDirection: "column", backgroundColor: "white", padding: 24}}>
+        <SafeAreaView style={{
+            flex: 1,
+            flexDirection: "column",
+            backgroundColor: "white",
+            paddingHorizontal: 24,
+            paddingVertical: 16
+        }}>
             <StatusBar style="dark"/>
-            <View style={{alignItems: "center", justifyContent: "center", marginTop: 45}}>
+            <View style={{alignItems: "center", justifyContent: "center"}}>
                 <Image
                     source={require('../assets/Intro.png')}
                 />
@@ -22,13 +32,11 @@ const Intro = ({navigation}) => {
                 marginTop: 42
             }}>Connect easily with your family and friends over countries</Text>
             <View style={{marginTop: "auto"}}>
-                <Text style={{textAlign: "center"}}>Terms & Privacy Policy</Text>
                 <CustomButton
-                    marginTop={18}
                     backgroundColor={brandColors.default}
                     title={"Start Messaging"}
                     titleColor={neutralColors.offWhite}
-                    onClicked={() => navigation.navigate("Login")}
+                    onPress={() => navigation.navigate("Login")}
                 />
             </View>
         </SafeAreaView>
